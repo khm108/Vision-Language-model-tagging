@@ -1,5 +1,13 @@
 import argparse
 import torch
+from pytube. innertube import _default_clients
+# pytube 유튜브 자바스크립트 변화로 코드 추가
+_default_clients[ "ANDROID"][ "context"]["client"]["clientVersion"] = "19.08.35"
+_default_clients["IOS"]["context"]["client"]["clientVersion"] = "19.08.35"
+_default_clients[ "ANDROID_EMBED"][ "context"][ "client"]["clientVersion"] = "19.08.35"
+_default_clients[ "IOS_EMBED"][ "context"]["client"]["clientVersion"] = "19.08.35"
+_default_clients["IOS_MUSIC"][ "context"]["client"]["clientVersion"] = "6.41"
+_default_clients[ "ANDROID_MUSIC"] = _default_clients[ "ANDROID_CREATOR" ]
 
 from llava.constants import (
     IMAGE_TOKEN_INDEX,
@@ -475,50 +483,73 @@ def multi_pooling(image, target_width, target_height, num_layers=2):
 
     return pooled_image
 
-# # 'mpst_full_data.csv' 파일에서 상위 100개 항목의 'title' 피처를 읽어옴
-# df = pd.read_csv('mpst_full_data.csv')
+# 'mpst_full_data.csv' 파일에서 상위 100개 항목의 'title' 피처를 읽어옴
+df = pd.read_csv('mpst_full_data.csv')
 # search_queries = df['title'].head(100).tolist()
+
+# 파인튜닝용 임시 list
+search_queries = [
+    "This Means War", 
+    "Star Wars: Episode V - The Empire Strikes Back", 
+    "Four Christmases", 
+    "17 Again", 
+    "Santa Fe Trail", 
+    "Natural Born Killers", 
+    "Crimson Tide", 
+    "Reservoir Dogs", 
+    "In a Lonely Place", 
+    "Teenage Mutant Ninja Turtles: Out of the Shadows", 
+    "Miller's Crossing", 
+    "Mission: Impossible III", 
+    "Paul Blart: Mall Cop", 
+    "Confessions of a Shopaholic", 
+    "Along Came a Spider", 
+    "Brokeback Mountain", 
+    "Big Fat Liar", 
+    "Clash of the Titans", 
+    "Broken Blossoms or The Yellow Man and the Girl", 
+    "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb"
+]
 
 # # 101~200개 항목
 # search_queries = df['title'].iloc[100:200].tolist()
 
 # 'ml-25m/movies.csv' 파일에서 상위 100개 항목의 'title' 피처를 읽어옴
-df = pd.read_csv('./ml-25m/movies.csv')
-search_queries = df['title'].head(100).tolist()
+# df = pd.read_csv('./ml-25m/movies.csv')
+# search_queries = df['title'].head(100).tolist()
 
 base_directory = 'videos'
 
-# # 검색어를 통한 유튜브 영상 데이터 크롤링 및 다운로드
-# crawl_start_time = time.time()
+# 검색어를 통한 유튜브 영상 데이터 크롤링 및 다운로드
+crawl_start_time = time.time()
 
-# for query in search_queries:
-#     movie_dir = os.path.join(base_directory, str(query))
-#     results = crawl_youtube_videos(str(query), max_results=5)
-#     for result in results:
-#         download_youtube_video(result['url'], movie_dir)
+for query in search_queries:
+    movie_dir = os.path.join(base_directory, str(query))
+    results = crawl_youtube_videos(str(query), max_results=5)
+    for result in results:
+        download_youtube_video(result['url'], movie_dir)
 
-# crawl_end_time = time.time()
+crawl_end_time = time.time()
 
-# # 각 영화 디렉토리에 있는 비디오 프레임 추출
-# for query in search_queries:
-#     movie_dir = os.path.join(base_directory, str(query))
+# 각 영화 디렉토리에 있는 비디오 프레임 추출
+for query in search_queries:
+    movie_dir = os.path.join(base_directory, str(query))
     
-#     # 디렉토리 존재하지 않는 경우 (상위 5개 영상 모두 사용 불가능한 경우)
-#     if not os.path.exists(movie_dir):
-#         print(f"디렉토리가 존재하지 않습니다: {movie_dir}")
-#         continue
+    # 디렉토리 존재하지 않는 경우 (상위 5개 영상 모두 사용 불가능한 경우)
+    if not os.path.exists(movie_dir):
+        print(f"디렉토리가 존재하지 않습니다: {movie_dir}")
+        continue
     
-#     video_files = [f for f in os.listdir(movie_dir) if f.endswith('.mp4')]
-#     for video_file in video_files:
-#         video_path = os.path.join(movie_dir, video_file)
-#         save_frames(video_path, 640, 360, movie_dir)
+    video_files = [f for f in os.listdir(movie_dir) if f.endswith('.mp4')]
+    for video_file in video_files:
+        video_path = os.path.join(movie_dir, video_file)
+        save_frames(video_path, 640, 360, movie_dir)
 
-# 이미지 분석 및 결과 저장
-analyze_start_time = time.time()
-analyze_images_and_save_results(base_directory, 'movie_tags_results.csv')
-analyze_end_time = time.time()
+# # 이미지 분석 및 결과 저장
+# analyze_start_time = time.time()
+# analyze_images_and_save_results(base_directory, 'movie_tags_results2.csv')
+# analyze_end_time = time.time()
 
 
-
-# print(f"크롤링 시간: {crawl_end_time - crawl_start_time}초")
-print(f"이미지 분석 및 저장 시간: {analyze_end_time - analyze_start_time}초")
+print(f"크롤링 시간: {crawl_end_time - crawl_start_time}초")
+# print(f"이미지 분석 및 저장 시간: {analyze_end_time - analyze_start_time}초")
